@@ -1,0 +1,214 @@
+<!-- Bilgi İçin: Mehmet TOKTAŞ -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>DİB-MBSTS PUAN HESAPLAMA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      color: #34495e;
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      font-weight: bold; /* Kalın yazı stili */
+      text-align-last: center;
+    }
+
+    select option {
+      font-weight: bold; /* Liste öğeleri için kalın yazı stili */
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #00acc1;
+      background-color: #e0f7fa;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 26px;
+      color: #00695c;
+      font-weight: bold;
+      text-align: center;
+      padding: 15px;
+      background: #e0f2f1;
+      border-radius: 10px;
+      border: 1px dashed #004d40;
+      text-transform: none;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+      font-weight: bold; /* Kalın yazı stili */
+      color: #34495e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>DİB-MBSTS PUAN HESAPLAMA</h2>
+
+    <label for="yearSelect">Sınav Yılı</label>
+    <select id="yearSelect" onchange="updateCorrectAnswers()">
+      <option value="" selected disabled>Seçiniz</option>
+      <!-- Yıl seçeneklerini dinamik olarak ekleyeceğiz -->
+    </select>
+
+    <label for="correctSelect">Doğru Cevap Sayısı</label>
+    <select id="correctSelect" onchange="calculateScore()">
+      <option value="" selected disabled>Seçiniz</option>
+    </select>
+
+    <h2 id="result">Puan :  </h2>
+
+    <div class="info">
+      <label>ÖSYM ile %100 uyumludur.</label>
+      <label>© Mehmet TOKTAŞ | 2025  </label>
+         <!-- <label>Hesaplamalar, ÖSYM verileriyle uyumludur.</label> -->
+         <!-- <label><a href="https://github.com/kullaniciadi/" target="_blank" style="color: #00008B; text-decoration: none;">© Mehmet TOKTAŞ | 2025</a></label> -->
+         <!-- <label>Bilgi İçin: Mehmet TOKTAŞ</label> -->
+         <!-- <label><a href="https://hatay.diyanet.gov.tr/reyhanli/Sayfalar/home.aspx" target="_blank" style="color: #00008B; text-decoration: none;">© Reyhanlı Müftülüğü | 2025</a></label> -->
+    </div>
+
+  </div>
+
+  <script>
+    // Yıl ve doğru cevap sayısına bağlı veriler
+    const yearData = {
+      2016: { min: 1, max: 56 },
+      2017: { min: 4, max: 58 },
+      2018: { min: 4, max: 58 },
+      2019: { min: 0, max: 59 },
+      2020: { min: 0, max: 56 },
+      2021: { min: 5, max: 59 },
+      2022: { min: 3, max: 58 },
+      2023: { min: 2, max: 59 },
+      2024: { min: 3, max: 58 },
+      2025: { min: 0, max: 60 },
+      2026: { min: 0, max: 60 },
+      2027: { min: 0, max: 60 },
+      2028: { min: 0, max: 60 },
+      2029: { min: 0, max: 60 },
+      2030: { min: 0, max: 60 },
+      2031: { min: 0, max: 60 },
+      2032: { min: 0, max: 60 },
+      2033: { min: 0, max: 60 },
+    };
+
+    const yearSelect = document.getElementById("yearSelect");
+    const correctSelect = document.getElementById("correctSelect");
+    const result = document.getElementById("result");
+
+    let hasCorrectSelection = false;
+
+    // Yıl seçimine göre doğru cevap aralığını güncelle
+    function updateCorrectAnswers() {
+      const year = parseInt(yearSelect.value);
+      const prevCorrect = correctSelect.value;
+      const max = year === 2015 ? 80 : 60;
+
+      // Seçenekleri sıfırla ve başla
+      correctSelect.innerHTML = '<option value="" selected disabled>Seçiniz</option>';
+
+      for (let i = 0; i <= max; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        correctSelect.appendChild(option);
+      }
+
+      // Önceki seçimi hatırlat
+      if (hasCorrectSelection) correctSelect.value = prevCorrect;
+
+      calculateScore();
+    }
+
+    // Puan hesaplamasını yap
+    function calculateScore() {
+      const year = parseInt(yearSelect.value);
+      const correctValue = correctSelect.value;
+
+      if (!correctValue || isNaN(correctValue)) {
+        result.innerText = "Puan :  ";
+        return;
+      }
+
+      hasCorrectSelection = true;
+      const correct = parseInt(correctValue);
+      let score;
+
+      if (year === 2015) {
+        score = (correct * 100) / 80;
+      } else {
+        const { min, max } = yearData[year];
+        score = (max - min === 0) ? 20 : 20 + 80 * ((correct - min) / (max - min));
+      }
+
+    // 2016 ve sonrasında min max doğru cevap sayısı kontrolü
+    if (year > 2015 && (correct < yearData[year].min || correct > yearData[year].max)) {
+      result.innerText = `${year} yılında ${correct} doğru cevap veren aday bulunmamaktadır!`;
+      return;
+    }
+
+      result.innerText = `Puan :  ${score.toFixed(5).replace('.', ',')}`; // Virgülden sonra 5 basamağı göster
+    }
+
+    // Sayfa yüklendiğinde yıl seçeneklerini oluştur
+    window.onload = () => {
+      for (let year = 2015; year <= 2024; year++) {
+        const option = document.createElement("option");
+        option.value = year;
+        option.text = year;
+        yearSelect.appendChild(option);
+      }
+
+      // İlk değerleri sıfırla
+      yearSelect.value = "";
+      correctSelect.innerHTML = '<option value="" selected disabled>Seçiniz</option>';
+      result.innerText = "Puan :  ";
+    };
+  </script>
+</body>
+</html>
