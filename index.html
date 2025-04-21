@@ -180,7 +180,7 @@
       let score;
 
       if (year === 2015) {
-        score = (correct * 100) / 80;
+        score = correct * (100 / 80);
       } else {
         const { min, max } = yearData[year];
         score = (max - min === 0) ? 20 : 20 + 80 * ((correct - min) / (max - min));
